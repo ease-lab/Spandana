@@ -6,7 +6,9 @@ metadata:
   labels:
     app.kubernetes.io/part-of: spandana
 data:
-  # Replace sro-host.example with an address reachable from the cluster.
+  # Replace sro-host.example with an address reachable from application pods.
+  # Each key is selected by the proxy container's configMapKeyRef. Keep the
+  # ports aligned with ingestAddress in configs/sro/<service>.json.
   ratings: http://sro-host.example:8087/metrics/ingest
   productpage: http://sro-host.example:8088/metrics/ingest
   details: http://sro-host.example:8089/metrics/ingest

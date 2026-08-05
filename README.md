@@ -89,6 +89,10 @@ deploy: `ratings-url`, `details-url`, `compression-url`, and `imgproc-url`.
 Serverless endpoints are deployment-specific and are not stored in this
 repository.
 
+The manifests also expect an EFS-backed PVC named `efs-claim` for persistent
+SLO Director logs. See [Deploying applications](docs/deploying-apps.md) for
+copyable Secret and EFS examples, ConfigMap key wiring, and verification steps.
+
 Apply the common ServiceAccount and endpoint ConfigMap before an application:
 
 ```bash
@@ -136,11 +140,6 @@ variables, output settings, and tmux commands.
 Generated traces are distributed separately and are intentionally not stored
 in Git. See [Workload traces](traces/README.md) for the k6 replay command.
 
-## Analysis
-
-Analysis scripts live under `experiments/analysis/`. Some accept input paths;
-others expect files such as `all_stats.csv` in the current directory. Generated
-results are not committed.
 
 ## Citation
 

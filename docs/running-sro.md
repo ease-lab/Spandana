@@ -37,6 +37,9 @@ Application manifests populate `SRO_INGEST_URL` from the matching ConfigMap
 key. Payloads also contain `DEPLOYMENT_NAME`, and an SRO rejects metrics for a
 different deployment.
 
+See [Deploying Spandana applications](deploying-apps.md) for the complete
+Secret, `configMapKeyRef`, and EFS logging setup.
+
 ## Run one service
 
 ```bash

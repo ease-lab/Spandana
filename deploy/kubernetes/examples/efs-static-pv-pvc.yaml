@@ -1,0 +1,40 @@
+# Static binding to an existing Amazon EFS filesystem. Replace the
+# volumeHandle before applying. An EFS access point can be specified as
+# fs-REPLACE_ME::fsap-REPLACE_ME.
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: spandana-efs-pv
+  labels:
+    app.kubernetes.io/part-of: spandana
+spec:
+  capacity:
+    # EFS grows elastically; Kubernetes uses this value for claim matching.
+    storage: 5Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
+  mountOptions:
+    - tls
+  csi:
+    driver: efs.csi.aws.com
+    volumeHandle: fs-REPLACE_ME
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  # The application manifests refer to this exact name.
+  name: efs-claim
+  namespace: default
+  labels:
+    app.kubernetes.io/part-of: spandana
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: ""
+  volumeName: spandana-efs-pv
+  resources:
+    requests:
+      storage: 5Gi
