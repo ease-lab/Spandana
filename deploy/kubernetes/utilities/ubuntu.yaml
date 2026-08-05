@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: ubuntu
+  namespace: default
+  labels:
+    app: ubuntu
+    app.kubernetes.io/part-of: spandana
+    app.kubernetes.io/component: debug-utility
+spec:
+  automountServiceAccountToken: false
+  terminationGracePeriodSeconds: 1
+  containers:
+    - name: ubuntu
+      image: ubuntu:24.04
+      imagePullPolicy: IfNotPresent
+      command: ["sleep", "infinity"]
+      resources:
+        requests:
+          cpu: 100m
+          memory: 64Mi
+        limits:
+          cpu: 500m
+          memory: 256Mi
+      volumeMounts:
+        - name: efs-volume
+          mountPath: /app/logs
+  volumes:
+    - name: efs-volume
+      persistentVolumeClaim:
+        claimName: efs-claim
+  restartPolicy: Always

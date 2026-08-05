@@ -45,7 +45,7 @@ In the new implementation, we removed Loki, Fluent Bit, and the intermediate tel
 - Go 1.24.1
 - a Kubernetes cluster and `kubectl`
 - `tmux`
-- Python 3 for analysis
+- Python 3.10+ for analysis
 - k6 for workload replay
 - Helm only for the optional AWS controller installer
 
@@ -91,7 +91,8 @@ repository.
 
 The manifests also expect an EFS-backed PVC named `efs-claim` for persistent
 SLO Director logs. See [Deploying applications](docs/deploying-apps.md) for
-copyable Secret and EFS examples, ConfigMap key wiring, and verification steps.
+copyable Secret and EFS examples, ConfigMap key wiring, debug-pod log
+inspection, and verification steps.
 
 Apply the common ServiceAccount and endpoint ConfigMap before an application:
 
@@ -140,6 +141,16 @@ variables, output settings, and tmux commands.
 Generated traces are distributed separately and are intentionally not stored
 in Git. See [Workload traces](traces/README.md) for the k6 replay command.
 
+## Request-log analysis
+
+After an experiment, fetch and analyze the SLO Director logs stored on EFS:
+
+```bash
+./scripts/fetch-request-logs.sh ratings
+```
+
+See [Request-log analysis](experiments/analysis/request-logs/README.md) for
+dependencies, configuration, outputs, and local-log analysis.
 
 ## Citation
 

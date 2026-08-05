@@ -147,6 +147,41 @@ POD_NAME=$(kubectl get pod -l app=ratings -o jsonpath='{.items[0].metadata.name}
 kubectl exec "$POD_NAME" -c proxy -- ls -la /app/logs/ratings
 ```
 
+### Inspect logs using the debug pod
+
+The optional Ubuntu pod mounts the same `efs-claim` at `/app/logs`. Deploy it
+and open an interactive shell:
+
+```bash
+kubectl apply -f deploy/kubernetes/utilities/ubuntu.yaml
+kubectl wait --for=condition=Ready pod/ubuntu --timeout=120s
+kubectl exec -it pod/ubuntu -- bash
+```
+
+Inside the pod, application logs are grouped by deployment name:
+
+```bash
+find /app/logs -maxdepth 2 -type f
+tail -f /app/logs/ratings/request_logs_*.txt
+```
+
+After the experiment has stopped writing logs, fetch and analyze a deployment:
+
+```bash
+./scripts/fetch-request-logs.sh ratings
+```
+
+See the [request-log analysis guide](../experiments/analysis/request-logs/README.md)
+for output files and configuration. The fetch command never deletes EFS logs.
+
+The mount is writable because `scripts/clean-efs-logs.sh` uses this pod to
+remove experiment logs. Delete the debug pod when it is no longer needed; this
+does not delete the PVC or its EFS data:
+
+```bash
+kubectl delete -f deploy/kubernetes/utilities/ubuntu.yaml
+```
+
 If a pod remains `Pending`, inspect `kubectl describe pod` and
 `kubectl describe pvc efs-claim`. Common causes are a missing CSI driver, an
 unbound PVC, missing EFS mount targets, or blocked TCP port 2049.
