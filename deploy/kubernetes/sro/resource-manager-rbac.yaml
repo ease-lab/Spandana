@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: hello-world-pod-reader
+  namespace: default
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: hello-world-pod-reader
+  namespace: default
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: hello-world-pod-reader-binding
+  namespace: default
+subjects:
+  - kind: ServiceAccount
+    name: hello-world-pod-reader
+    namespace: default
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: hello-world-pod-reader
+
+
+# In Deployment use this
+# spec:
+#   serviceAccountName: hello-world-pod-reader
+#   containers:
+#     - name: hello-world-container
+#       image: your-image
+#       # ...

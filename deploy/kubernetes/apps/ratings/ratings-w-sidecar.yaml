@@ -1,0 +1,108 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ratings
+  labels:
+    app: ratings
+    # version: v2
+spec:
+  replicas: 13
+  selector:
+    matchLabels:
+      app: ratings
+      version: v2
+  template:
+    metadata:
+      labels:
+        app: ratings
+        version: v2
+    spec:
+      serviceAccountName: details-sa
+
+      securityContext:
+        runAsUser: 0  # Run as root
+
+      initContainers:
+      - name: init-networking
+        image: ghcr.io/ease-lab/spandana/port-forwarder:latest
+        imagePullPolicy: Always
+        env:
+          - name: DPORT
+            value: "9080"
+        securityContext:
+          capabilities:
+            add:
+              - NET_ADMIN
+          privileged: true
+
+      containers:
+      - name: proxy
+        image: ghcr.io/ease-lab/spandana/slo-director:latest
+        imagePullPolicy: Always
+        ports:
+          - containerPort: 8000
+        resources:
+          requests:
+            cpu: "0.6"
+        env:
+          - name: VM_BACKEND_URL
+            value: "http://localhost"
+          - name: VM_BACKEND_PORT
+            value: "9080"
+          - name: SERVERLESS_URL
+            valueFrom:
+              secretKeyRef:
+                name: spandana-serverless-backends
+                key: ratings-url
+          - name: SERVERLESS_PORT
+            value: "80"
+          - name: PROXY_PORT
+            value: "8000"
+          - name: RATE_LIMIT
+            value: "150"
+          - name: QUEUE_SIZE
+            value: "9"
+          - name: LATENCY_SLO_MS
+            value: "140"
+          - name: SLO_PASS_THRESHOLD
+            value: "100"
+          - name: SLO_VIOLATION_THRESHOLD
+            value: "100"
+          - name: RING_SIZE
+            value: "120"
+          - name: POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: DEPLOYMENT_NAME
+            value: "ratings"
+          - name: SRO_INGEST_URL
+            valueFrom:
+              configMapKeyRef:
+                name: spandana-sro-endpoints
+                key: ratings
+        volumeMounts:
+          - name: efs-volume
+            mountPath: /app/logs
+
+      - name: ratings
+        image: ghcr.io/ease-lab/spandana/ratings:latest
+        imagePullPolicy: Always
+        ports:
+          - containerPort: 9080
+        resources:
+          limits:
+            cpu: "1"
+          requests:
+            cpu: "1"
+        lifecycle:
+          preStop:
+            exec:
+          # Keep the pod alive for 30 seconds to allow the ALB
+          # to deregister the target gracefully.
+              command: ["/bin/sh", "-c", "sleep 10"]
+
+      volumes:
+        - name: efs-volume
+          persistentVolumeClaim:
+            claimName: efs-claim

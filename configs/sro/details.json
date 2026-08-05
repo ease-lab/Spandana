@@ -1,0 +1,11 @@
+{
+  "deploymentName": "details",
+  "executionTimeMs": 20.0,
+  "memoryMB": 384.0,
+  "rpsPerUnitOfScaling": 240.0,
+  "appCPU": 1000,
+  "helperCPU": 0,
+  "scaleInterval": 120,
+  "queueSize": 9,
+  "ingestAddress": ":8089"
+}

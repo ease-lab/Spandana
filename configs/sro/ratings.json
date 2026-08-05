@@ -1,0 +1,11 @@
+{
+  "deploymentName": "ratings",
+  "executionTimeMs": 17.0,
+  "memoryMB": 512.0,
+  "rpsPerUnitOfScaling": 150.0,
+  "appCPU": 1000,
+  "helperCPU": 0,
+  "scaleInterval": 120,
+  "queueSize": 9,
+  "ingestAddress": ":8087"
+}

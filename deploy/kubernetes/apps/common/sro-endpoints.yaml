@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: spandana-sro-endpoints
+  namespace: default
+  labels:
+    app.kubernetes.io/part-of: spandana
+data:
+  # Replace sro-host.example with an address reachable from the cluster.
+  ratings: http://sro-host.example:8087/metrics/ingest
+  productpage: http://sro-host.example:8088/metrics/ingest
+  details: http://sro-host.example:8089/metrics/ingest
+  reviews: http://sro-host.example:8090/metrics/ingest
+  compression: http://sro-host.example:8091/metrics/ingest
+  imgproc: http://sro-host.example:8092/metrics/ingest

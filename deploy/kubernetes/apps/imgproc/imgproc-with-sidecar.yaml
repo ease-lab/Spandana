@@ -1,0 +1,128 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: imgproc
+  labels:
+    app: imgproc
+    version: v1
+spec:
+  replicas: 15
+  selector:
+    matchLabels:
+      app: imgproc
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: imgproc
+        version: v1
+    spec:
+      serviceAccountName: details-sa 
+
+      securityContext:
+        runAsUser: 0  # Run as root (matches your example)
+
+      initContainers:
+      - name: init-networking
+        image: ghcr.io/ease-lab/spandana/port-forwarder:latest
+        imagePullPolicy: Always
+        env:
+          - name: DPORT
+            value: "9080"
+        securityContext:
+          capabilities:
+            add:
+              - NET_ADMIN
+          privileged: true
+
+      containers:
+      
+      - name: proxy
+        image: ghcr.io/ease-lab/spandana/slo-director:latest
+        imagePullPolicy: Always
+        ports:
+          - containerPort: 8000
+        resources:
+          requests:
+            cpu: "0.6"
+        env:
+          - name: VM_BACKEND_URL
+            value: "http://localhost"
+          - name: VM_BACKEND_PORT
+            value: "9080"
+          - name: SERVERLESS_URL
+            valueFrom:
+              secretKeyRef:
+                name: spandana-serverless-backends
+                key: imgproc-url
+          - name: SERVERLESS_PORT
+            value: "80"
+          - name: PROXY_PORT
+            value: "8000"
+          - name: RATE_LIMIT
+            value: "70"
+          - name: QUEUE_SIZE
+            value: "9"
+          - name: LATENCY_SLO_MS
+            value: "1000"
+          - name: SLO_PASS_THRESHOLD
+            value: "1000"
+          - name: SLO_VIOLATION_THRESHOLD
+            value: "1000"
+          - name: RING_SIZE
+            value: "120"
+          - name: POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: DEPLOYMENT_NAME
+            value: "imgproc"
+          - name: SRO_INGEST_URL
+            valueFrom:
+              configMapKeyRef:
+                name: spandana-sro-endpoints
+                key: imgproc
+        volumeMounts:
+          - name: efs-volume
+            mountPath: /app/logs      
+      - name: imgproc
+        image: ghcr.io/ease-lab/spandana/imgproc:latest
+        imagePullPolicy: Always
+        ports:
+          - containerPort: 9080
+        env:
+          - name: AWS_REGION
+            value: us-east-1
+
+        resources:
+          limits:
+            cpu: "1"
+          requests:
+            cpu: "1"
+        lifecycle:
+          preStop:
+            exec:
+              # keep pod alive briefly so LB deregisters cleanly
+              command: ["/bin/sh", "-c", "sleep 10"]
+
+      volumes:
+        - name: efs-volume
+          persistentVolumeClaim:
+            claimName: efs-claim
+
+---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: imgproc
+#   labels:
+#     app: imgproc
+# spec:
+#   selector:
+#     app: imgproc
+#   ports:
+#     - name: http
+#       port: 8080       # cluster port
+#       targetPort: 8080 # container port
+#   type: ClusterIP

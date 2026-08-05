@@ -1,0 +1,47 @@
+# Compiled binaries and build output
+/bin/
+/dist/
+/slo-director
+/sro
+/telemetry-fetcher
+/resource-manager
+*.test
+coverage.out
+
+# Generated experiment output
+/artifacts/
+latencies*.csv
+
+# Separately distributed workload data
+/traces/**/flattened_schedule.json
+/traces/*.zip
+
+# Local configuration and credentials
+.env
+.env.*
+!.env.example
+config.conf
+*.pem
+*.key
+*.tfvars
+*.tfstate
+*.tfstate.*
+.terraform/
+kubeconfig
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Editors and operating systems
+.idea/
+.vscode/
+*.swp
+*~
+.DS_Store
+
+# Temporary files
+*.tmp
+*.bak

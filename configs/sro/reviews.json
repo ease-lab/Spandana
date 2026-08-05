@@ -1,0 +1,11 @@
+{
+  "deploymentName": "reviews",
+  "executionTimeMs": 62.0,
+  "memoryMB": 1024.0,
+  "rpsPerUnitOfScaling": 160.0,
+  "appCPU": 1000,
+  "helperCPU": 0,
+  "scaleInterval": 120,
+  "queueSize": 9,
+  "ingestAddress": ":8090"
+}

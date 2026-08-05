@@ -1,0 +1,11 @@
+{
+  "deploymentName": "imgproc",
+  "executionTimeMs": 40.0,
+  "memoryMB": 512.0,
+  "rpsPerUnitOfScaling": 70.0,
+  "appCPU": 1000,
+  "helperCPU": 0,
+  "scaleInterval": 120,
+  "queueSize": 9,
+  "ingestAddress": ":8092"
+}
